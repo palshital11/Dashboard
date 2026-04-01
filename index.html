@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M&M ESG Ultimate Dynamic Command Center</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { --m-red: #E31937; --m-dark: #0a0c10; --card-bg: #161b22; --border: #30363d; --text: #c9d1d9; --green: #3fb950; --red: #f85149; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--m-dark); margin: 0; padding: 20px; color: var(--text); overflow-x: hidden; }
+        .container { max-width: 1600px; margin: auto; }
+        
+        header { background: linear-gradient(135deg, #E31937 0%, #800e1f 100%); padding: 30px; border-radius: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.1); }
+        .live-tag { background: rgba(0,255,0,0.2); color: #00ff88; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 12px; border: 1px solid #00ff88; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+        /* Navigation Pillars */
+        .pillar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
+        .pillar-card { background: var(--card-bg); padding: 20px; border-radius: 12px; cursor: pointer; border: 1px solid var(--border); transition: 0.3s; position: relative; }
+        .pillar-card:hover { border-color: var(--m-red); transform: translateY(-5px); background: #21262d; }
+        .pillar-card.active { border-bottom: 4px solid var(--m-red); background: #21262d; box-shadow: 0 4px 20px rgba(227, 25, 55, 0.2); }
+        .pillar-card h4 { margin: 0; font-size: 12px; color: #8b949e; text-transform: uppercase; letter-spacing: 1px; }
+        .pillar-card .summary-val { font-size: 24px; font-weight: bold; color: white; margin: 10px 0; }
+        .badge { position: absolute; top: 15px; right: 15px; background: var(--m-red); color: white; font-size: 10px; padding: 2px 8px; border-radius: 10px; }
+
+        /* Audit Table */
+        .table-section { background: var(--card-bg); padding: 25px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 30px; }
+        .scroll-box { max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { position: sticky; top: 0; background: #21262d; padding: 15px; text-align: left; color: #8b949e; border-bottom: 1px solid var(--border); }
+        td { padding: 12px; border-bottom: 1px solid var(--border); }
+        .live-num { font-family: 'Courier New', monospace; font-weight: bold; font-size: 14px; }
+
+        /* SDG Grid Overhaul */
+        .sdg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-top: 20px; }
+        .sdg-card { background: var(--card-bg); border-radius: 10px; padding: 15px; border: 1px solid var(--border); text-align: center; transition: 0.3s; }
+        .sdg-card:hover { border-color: #58a6ff; }
+        .sdg-header { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; }
+        .sdg-icon { width: 24px; height: 24px; border-radius: 4px; color: white; font-weight: bold; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+        .sdg-score { font-size: 28px; font-weight: 800; margin: 5px 0; }
+        .graph-wrap { height: 60px; width: 100%; margin-top: 10px; }
+
+        /* Bottom Panels */
+        .bottom-grid { display: grid; grid-template-columns: 1fr 400px; gap: 20px; }
+        .emission-card { background: #0d1117; padding: 25px; border-radius: 12px; border: 1px solid var(--m-red); }
+        .scope-item { padding: 15px; border-left: 3px solid var(--m-red); background: #161b22; margin-bottom: 10px; border-radius: 0 8px 8px 0; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div>
+            <h1 style="margin:0; letter-spacing: -1px;">M&M ESG STRATEGIC COMMAND</h1>
+            <p style="margin:5px 0 0; color: #8b949e;">Multi-Sheet Audit Integration • Pseudo-Dynamic Stream v3.0</p>
+        </div>
+        <div class="live-tag">RECONNECTING TO DATA SOURCE... ACTIVE</div>
+    </header>
+
+    <div class="pillar-grid">
+        <div class="pillar-card active" onclick="loadTab('Environmental', this)">
+            <span class="badge">20 ROWS</span>
+            <h4>Environmental</h4>
+            <div class="summary-val" id="sum-env">1.8 MtCO₂e</div>
+        </div>
+        <div class="pillar-card" onclick="loadTab('Social', this)">
+            <span class="badge">17 ROWS</span>
+            <h4>Social</h4>
+            <div class="summary-val" id="sum-soc">0.32 Ratio</div>
+        </div>
+        <div class="pillar-card" onclick="loadTab('Governance', this)">
+            <span class="badge">10 ROWS</span>
+            <h4>Governance</h4>
+            <div class="summary-val" id="sum-gov">0.45 Indep.</div>
+        </div>
+        <div class="pillar-card" onclick="loadTab('Supply Chain', this)">
+            <span class="badge">6 ROWS</span>
+            <h4>Supply Chain</h4>
+            <div class="summary-val" id="sum-sup">Implemented</div>
+        </div>
+    </div>
+
+    <div class="table-section">
+        <h3 id="table-head" style="margin-top:0">Environmental Audit Points</h3>
+        <div class="scroll-box">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Audit Point</th><th>KPI / Metric</th><th>Target</th><th>Live Status</th><th>Gap Analysis</th><th>Owner</th>
+                    </tr>
+                </thead>
+                <tbody id="audit-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="bottom-grid">
+        <div class="sdg-section">
+            <h3 style="margin:0">17 SDG Global Volatility (Range: -5 to +5)</h3>
+            <div class="sdg-grid" id="sdg-box"></div>
+        </div>
+        
+        <div class="emission-card">
+            <h3 style="margin-top:0; color:var(--m-red)">Emission Pulse</h3>
+            <div class="scope-item">
+                <small>SCOPE 1 (Direct)</small>
+                <div class="sdg-score" style="color:#00ff88" id="sc1">1.80</div>
+            </div>
+            <div class="scope-item">
+                <small>SCOPE 2 (Indirect)</small>
+                <div class="sdg-score" style="color:#00ff88" id="sc2">0.90</div>
+            </div>
+            <div class="scope-item" style="border-color:#58a6ff">
+                <small>SCOPE 3 (Value Chain)</small>
+                <div class="sdg-score" id="sc3">120.0</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const excelData = {
+        Environmental: [
+            {pt:"Scope 1 GHG Emissions", kpi:"Direct (MtCO₂e)", tgt:"≤1.7", cur:1.80, gap:"Expansion", own:"Operations"},
+            {pt:"Scope 2 GHG Emissions", kpi:"Electricity (MtCO₂e)", tgt:"≤0.8", cur:0.90, gap:"Efficiency", own:"Manufacturing"},
+            {pt:"Scope 3 GHG Emissions", kpi:"Value chain (MtCO₂e)", tgt:"Reduce", cur:120.0, gap:"Validation", own:"Executive ESG"},
+            {pt:"Renewable Energy Usage", kpi:"% Electricity", tgt:"1.0", cur:0.82, gap:"Water Stress", own:"Energy Mgmt"},
+            {pt:"Energy Consumption", kpi:"Total (GWh)", tgt:"Reduce", cur:36000, gap:"Scaling", own:"Facilities"},
+            {pt:"Energy Intensity", kpi:"MWh / vehicle", tgt:"≤4.0", cur:4.20, gap:"Below Target", own:"Manufacturing"},
+            {pt:"SBTi Commitment", kpi:"Approved (Y/N)", tgt:"Yes", cur:"No", gap:"Regulatory", own:"Facilities"},
+            {pt:"Water Withdrawal", kpi:"Million m³", tgt:"≤9.0", cur:9.50, gap:"Expansion", own:"EHS Team"},
+            {pt:"Water Intensity", kpi:"m³ / vehicle", tgt:"≤1.0", cur:1.10, gap:"Scaling", own:"Operations"},
+            {pt:"Water Recycling", kpi:"% Recycled", tgt:"≥70%", cur:0.67, gap:"Dependency", own:"EHS Team"},
+            {pt:"Wastewater Discharge", kpi:"Treated (Mm³)", tgt:"Comp.", cur:"100%", gap:"None", own:"IT & EHS"},
+            {pt:"Total Waste Generated", kpi:"Million tonnes", tgt:"Reduce", cur:1.30, gap:"Scaling", own:"EHS Team"},
+            {pt:"Waste Diversion Rate", kpi:"% from Landfill", tgt:"≥90%", cur:0.85, gap:"Limited Sites", own:"Operations"},
+            {pt:"E-waste Management", kpi:"% Recycled", tgt:"1", cur:0.95, gap:"Dependency", own:"EHS Team"},
+            {pt:"Air Emissions", kpi:"NOx/SOx/PM", tgt:"Limits", cur:"Within", gap:"None", own:"IT & EHS"},
+            {pt:"Spill Incidents", kpi:"Number", tgt:"Zero", cur:0, gap:"None", own:"EHS Team"},
+            {pt:"Ops in Protected Areas", kpi:"Site count", tgt:"Zero", cur:0, gap:"None", own:"Compliance"},
+            {pt:"Habitat Restoration", kpi:"Project count", tgt:"Increase", cur:3, gap:"None", own:"Compliance"},
+            {pt:"Env Violations", kpi:"Regulatory count", tgt:"Zero", cur:0, gap:"None", own:"Compliance"},
+            {pt:"ISO 14001 Cert.", kpi:"% facilities", tgt:"1", cur:1, gap:"None", own:"EHS Mgmt"}
+        ],
+        Social: [
+            {pt:"Gender Diversity", kpi:"% female ratio", tgt:"≤40%", cur:0.32, gap:"Benchmark", own:"HR & DEI"},
+            {pt:"Ethnic Diversity", kpi:"% underrep.", tgt:"≤30%", cur:0.24, gap:"Leadership", own:"HR & DEI"},
+            {pt:"Pay Equity", kpi:"Gender gap", tgt:"1.0", cur:0.95, gap:"Minor Gaps", own:"Compensation"},
+            {pt:"TRIR", kpi:"per 200k hrs", tgt:"≤0.8", cur:1.1, gap:"Mfg Incident", own:"EHS Team"},
+            {pt:"LTIR", kpi:"Lost time rate", tgt:"≤0.4", cur:0.6, gap:"Programs", own:"EHS Team"},
+            {pt:"Engagement Score", kpi:"Survey %", tgt:"≥80%", cur:0.72, gap:"Expansion", own:"HR Team"},
+            {pt:"Training Hours", kpi:"Avg per emp", tgt:"≥40", cur:28, gap:"Coverage", own:"L&D Team"},
+            {pt:"Voluntary Turnover", kpi:"% leaving", tgt:"≤12%", cur:0.18, gap:"Retention", own:"HR Leadership"},
+            {pt:"Living Wage", kpi:"% covered", tgt:"Yes", cur:"Partial", gap:"Sites pending", own:"HR Compliance"},
+            {pt:"Freedom of Association", kpi:"Compliance", tgt:"Comp.", cur:"Comp.", gap:"None", own:"Legal & HR"},
+            {pt:"Human Rights DD", kpi:"% assessed", tgt:"Yes", cur:"Partial", gap:"Supplier Cov", own:"Supply Chain"},
+            {pt:"Child/Forced Labor", kpi:"Incidents", tgt:"Zero", cur:0, gap:"None", own:"Compliance"},
+            {pt:"Grievance Mechanisms", kpi:"Functioning", tgt:"Yes", cur:"Impl.", gap:"Awareness", own:"Compliance"},
+            {pt:"Community Investment", kpi:"% revenue", tgt:"≥1%", cur:0.006, gap:"Funding", own:"CSR Team"},
+            {pt:"Local Hiring", kpi:"% local", tgt:"≥60%", cur:0.52, gap:"Allocation", own:"HR"},
+            {pt:"Customer Complaints", kpi:"per 1k vehicles", tgt:"Comp.", cur:"Comp.", gap:"Skill gaps", own:"Customer Ops"},
+            {pt:"Data Privacy Breaches", kpi:"Number", tgt:"0", cur:"1 minor", gap:"None", own:"IT Security"}
+        ],
+        Governance: [
+            {pt:"Board Independence", kpi:"% Independent", tgt:">50%", cur:0.45, gap:"Governance", own:"Board"},
+            {pt:"ESG Committee", kpi:"Dedicated (Y/N)", tgt:"Yes", cur:"Partial", gap:"Charter", own:"Board"},
+            {pt:"Board Diversity", kpi:"% diverse", tgt:"Comp.", cur:"Impl.", gap:"Coverage", own:"Compliance"},
+            {pt:"Anti-Corruption Training", kpi:"% trained", tgt:"Yes", cur:"Impl.", gap:"Awareness", own:"Compliance"},
+            {pt:"Corruption Incidents", kpi:"Substantiated", tgt:"Zero", cur:"1 minor", gap:"Controls", own:"IT Security"},
+            {pt:"Whistleblower Cases", kpi:"Reported count", tgt:"Comp.", cur:"Comp.", gap:"None", own:"Compliance"},
+            {pt:"ESG Report Published", kpi:"Annual report", tgt:"Yes", cur:"Impl.", gap:"Integrated", own:"Risk Mgmt"},
+            {pt:"Report Assurance", kpi:"External level", tgt:"Yes", cur:"Partial", gap:"KPI linking", own:"Comp Committee"},
+            {pt:"ESG Risk Integration", kpi:"ERM Compliance", tgt:"Comp.", cur:"Partial", gap:"Standards", own:"Sustainability"},
+            {pt:"ESG-Linked Pay", kpi:"% linked", tgt:"Yes", cur:"Effective", gap:"None", own:"Internal Audit"}
+        ],
+        "Supply Chain": [
+            {pt:"Supplier ESG Assessment", kpi:"% assessed", tgt:"yes", cur:"Impl.", gap:"Regional", own:"SC ESG Team"},
+            {pt:"Supplier Code", kpi:"% signed CoC", tgt:"yes", cur:"Partial", gap:"Tier-2", own:"SC ESG"},
+            {pt:"Supply Chain Audits", kpi:"Audits / year", tgt:"Annual", cur:"Limited", gap:"Resource", own:"Procurement"},
+            {pt:"Conflict Minerals", kpi:"RMAP-compliant", tgt:"Comp.", cur:"Comp.", gap:"None", own:"Compliance"},
+            {pt:"ESG Maturity Score", kpi:"1-5 scale", tgt:"Comp.", cur:"Partial", gap:"Certifs", own:"SC ESG"},
+            {pt:"Stakeholder Engagement", kpi:"Activities / yr", tgt:"yes", cur:"Partial", gap:"Upstream", own:"SC & IT"}
+        ]
+    };
+
+    let currentPillar = 'Environmental';
+    const sdgCharts = [];
+
+    function loadTab(pillar, el) {
+        currentPillar = pillar;
+        document.querySelectorAll('.pillar-card').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('table-head').innerText = `${pillar} Audit Points`;
+        renderTable();
+    }
+
+    function renderTable() {
+        const body = document.getElementById('audit-body');
+        body.innerHTML = excelData[currentPillar].map((row, idx) => `
+            <tr>
+                <td style="font-weight:bold">${row.pt}</td>
+                <td>${row.kpi}</td>
+                <td style="color:#888">${row.tgt}</td>
+                <td class="live-num" id="live-${idx}" style="color:${typeof row.cur === 'number' ? '#00ff88' : 'white'}">${row.cur}</td>
+                <td style="font-size:11px; color:#f85149">${row.gap}</td>
+                <td style="color:#888">${row.own}</td>
+            </tr>
+        `).join('');
+    }
+
+    // Overhauled SDG Section
+    const sdgColors = ["#E5243B","#DDA63A","#4C9F38","#C5192D","#FF3A21","#26BDE2","#FDB713","#A21942","#FD6925","#DD1367","#FD9D24","#BF8B2E","#3F7E44","#0A97D9","#56C02B","#00689D","#19486A"];
+    const sdgCont = document.getElementById('sdg-box');
+    for(let i=1; i<=17; i++) {
+        const div = document.createElement('div');
+        div.className = 'sdg-card';
+        div.innerHTML = `
+            <div class="sdg-header">
+                <div class="sdg-icon" style="background:${sdgColors[i-1]}">${i}</div>
+                <small style="font-size:10px; color:#8b949e">GOAL ${i}</small>
+            </div>
+            <div class="sdg-score" id="score-${i}">0.0</div>
+            <div class="graph-wrap"><canvas id="canvas-${i}"></canvas></div>
+        `;
+        sdgCont.appendChild(div);
+        
+        const ctx = document.getElementById(`canvas-${i}`).getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: { labels: Array(15).fill(''), datasets: [{ data: Array(15).fill(0), borderColor: '#58a6ff', borderWidth: 2, pointRadius: 0, fill: false, tension: 0.4 }] },
+            options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false, min: -5, max: 5 } } }
+        });
+        sdgCharts.push(chart);
+    }
+
+    // Dynamic Engine
+    setInterval(() => {
+        // 1. Update Table
+        excelData[currentPillar].forEach((row, idx) => {
+            if(typeof row.cur === 'number') {
+                const el = document.getElementById(`live-${idx}`);
+                const change = (Math.random() - 0.5) * (row.cur * 0.02);
+                el.innerText = (row.cur + change).toFixed(2);
+            }
+        });
+
+        // 2. Update SDG Scores (-5 to +5)
+        for(let i=1; i<=17; i++) {
+            const scoreEl = document.getElementById(`score-${i}`);
+            const chart = sdgCharts[i-1];
+            
+            // Generate pseudo-random score between -5 and 5
+            const newScore = (Math.random() * 10 - 5).toFixed(1);
+            scoreEl.innerText = (newScore > 0 ? "+" : "") + newScore;
+            scoreEl.style.color = newScore > 0 ? "#3fb950" : "#f85149";
+            
+            // Update Graph
+            chart.data.datasets[0].data.shift();
+            chart.data.datasets[0].data.push(newScore);
+            chart.data.datasets[0].borderColor = newScore > 0 ? "#3fb950" : "#f85149";
+            chart.update('none');
+        }
+
+        // 3. Update Summary Boxes
+        document.getElementById('sc1').innerText = (1.8 + (Math.random()-0.5)*0.05).toFixed(2);
+        document.getElementById('sc2').innerText = (0.9 + (Math.random()-0.5)*0.03).toFixed(2);
+    }, 2000);
+
+    window.onload = renderTable;
+</script>
+</body>
+</html>
